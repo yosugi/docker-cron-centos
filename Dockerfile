@@ -14,4 +14,7 @@ RUN sed -i -e '/pam_loginuid.so/s/^/#/' /etc/pam.d/crond
 
 RUN chmod 0644 /etc/crontab
 
+# Add crontab setting
+# # RUN echo '* * * * * root /path/to/your/command' >> /etc/crontab
+
 CMD crond && tail -f /dev/null
