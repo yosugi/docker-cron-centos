@@ -2,19 +2,23 @@
 FROM centos:latest
 MAINTAINER yosugi
 
-# install crontabs
-RUN yum -y update
-RUN yum -y install crontabs
-
 # change timezone to JST
 RUN cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 
-# comment out PAM
-RUN sed -i -e '/pam_loginuid.so/s/^/#/' /etc/pam.d/crond
+# install busybox
+RUN yum -y update
+RUN yum groupinstall "Development Tools" -y
 
-RUN chmod 0644 /etc/crontab
+# build busybox
+WORKDIR /root
+RUN git clone git://busybox.net/busybox.git
+WORKDIR /root/busybox
+RUN make defconfig
+RUN make
 
-# Add crontab setting
-# # RUN echo '* * * * * root /path/to/your/command' >> /etc/crontab
+RUN mkdir -p /var/spool/cron/crontabs/
 
-CMD crond && tail -f /dev/null
+# write your crontab setting to root file
+ADD root /var/spool/cron/crontabs/root
+
+CMD ["./busybox", "crond", "-f"]
